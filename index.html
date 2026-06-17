@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- ===== EDIT: Page title & metadata ===== -->
-  <title>Contact-Relative Invariant EKF for Wide-Footed Wearable Robots</title>
-  <meta name="description" content="Wide feet break ordinary contact-aided InEKF. We rescue it with a purely proprioceptive contact-relative SLAM correction — no camera — cutting drift ~2.2x on a wide-footed exoskeleton." />
-  <meta name="keywords" content="state estimation, invariant EKF, InEKF, legged robots, exoskeleton, wearable robot, SLAM, proprioception" />
+  <title>Heel-to-Toe State Estimation for Exoskeletons — Contact-Relative Invariant EKF</title>
+  <meta name="description" content="Heel-to-toe gait makes the exoskeleton's wide foot roll, breaking ordinary contact-aided InEKF. A purely proprioceptive contact-relative correction — no camera — cuts drift ~2.2x." />
+  <meta name="keywords" content="state estimation, invariant EKF, InEKF, exoskeleton, wearable robot, heel-to-toe gait, contact, SLAM, proprioception" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="Contact-Relative Invariant EKF for Wide-Footed Wearable Robots" />
-  <meta property="og:description" content="Wide feet break ordinary contact-aided InEKF. A proprioceptive contact-relative correction fixes it — no camera." />
+  <meta property="og:title" content="Heel-to-Toe State Estimation for Exoskeletons" />
+  <meta property="og:description" content="The wide, rolling foot breaks ordinary contact-aided InEKF. A proprioceptive contact-relative correction fixes it — no camera." />
   <meta property="og:type" content="website" />
 
   <!-- Fonts -->
@@ -60,6 +60,7 @@
   .paper-title .subtitle{display:block;font-size:1.3rem;font-weight:500;color:var(--text-muted);margin-top:.6rem;letter-spacing:-.01em;}
   .author-list{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin:1.6rem 0 .4rem;font-size:1.08rem;}
   .author a{font-weight:500;}
+  .author-name{font-weight:500;}
   .affiliations{color:var(--text-muted);font-size:.95rem;margin-bottom:.3rem;}
   .link-buttons{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.6rem;}
   .btn{display:inline-flex;align-items:center;gap:.5em;font-size:.92rem;font-weight:500;text-decoration:none;
@@ -136,24 +137,41 @@
     </div>
 
     <h1 class="paper-title">
-      Contact-Relative Invariant EKF
-      <span class="subtitle">Rescuing State Estimation for Wide-Footed Wearable Robots</span>
+      Heel-to-Toe State Estimation for Exoskeletons
+      <span class="subtitle">A Contact-Relative Invariant EKF for Wide, Rolling Feet</span>
     </h1>
 
     <!-- ===== EDIT authors / affiliation ===== -->
     <div class="author-list">
-      <div class="author"><a href="#">Jinsu Park</a></div>
+      <div class="author"><span class="author-name">Jinsu Park</span></div>
+      <div class="author"><span class="author-name">Sungwoo Kim</span></div>
     </div>
     <div class="affiliations">Wearable Robotics &amp; State Estimation</div>
 
     <div class="link-buttons">
       <!-- ===== EDIT links ===== -->
       <a href="#" class="btn ghost"><i class="fas fa-file-pdf"></i> Paper (soon)</a>
-      <a href="https://github.com/" class="btn"><i class="fab fa-github"></i> Code</a>
-      <a href="#results" class="btn ghost"><i class="fas fa-chart-column"></i> Results</a>
+      <a href="#results" class="btn"><i class="fas fa-chart-column"></i> Results</a>
     </div>
   </div>
 </header>
+
+<!-- ╔═══ TEASER VIDEO ═══╗ -->
+<section class="section" style="padding:2.2rem 0 1rem;">
+  <div class="container">
+    <figure>
+      <video src="static/demo.mp4" autoplay loop muted playsinline preload="metadata"
+        poster="static/trajectory.png"
+        style="width:100%;border:1px solid var(--border);border-radius:var(--radius);background:#fff;"></video>
+      <figcaption>
+        An 80&nbsp;s walk replayed through both filters from the <em>same</em> recorded IMU + encoder
+        stream. The standard InEKF (red) spirals away from the 2.8&nbsp;m path as the wide foot rolls;
+        the proprioceptive contact-relative estimate (green) stays locked to ground truth (black) —
+        no camera.
+      </figcaption>
+    </figure>
+  </div>
+</section>
 
 <!-- ╔═══ ABSTRACT ═══╗ -->
 <section class="section">
@@ -352,10 +370,10 @@
   <div class="container narrow">
     <p class="kicker">Citation</p>
     <h2>BibTeX</h2>
-    <pre class="bibtex">@misc{park_contact_relative_inekf,
-  title  = {Contact-Relative Invariant EKF: Rescuing State Estimation
-            for Wide-Footed Wearable Robots},
-  author = {Park, Jinsu},
+    <pre class="bibtex">@misc{park_kim_heel_to_toe_inekf,
+  title  = {Heel-to-Toe State Estimation for Exoskeletons:
+            A Contact-Relative Invariant EKF for Wide, Rolling Feet},
+  author = {Park, Jinsu and Kim, Sungwoo},
   year   = {2026},
   note   = {Project page},
 }</pre>
