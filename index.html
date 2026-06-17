@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ===== EDIT: Page title & metadata ===== -->
+  <title>Contact-Relative Invariant EKF for Wide-Footed Wearable Robots</title>
+  <meta name="description" content="Wide feet break ordinary contact-aided InEKF. We rescue it with a purely proprioceptive contact-relative SLAM correction — no camera — cutting drift ~2.2x on a wide-footed exoskeleton." />
+  <meta name="keywords" content="state estimation, invariant EKF, InEKF, legged robots, exoskeleton, wearable robot, SLAM, proprioception" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Contact-Relative Invariant EKF for Wide-Footed Wearable Robots" />
+  <meta property="og:description" content="Wide feet break ordinary contact-aided InEKF. A proprioceptive contact-relative correction fixes it — no camera." />
+  <meta property="og:type" content="website" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <!-- Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- KaTeX (math) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+  <style>
+  /* ── Theme (monochrome academic) ───────────────────────────── */
+  :root{
+    --primary:#222; --accent:#555;
+    --bg:#fff; --bg-alt:#fafafa; --bg-dark:#141414;
+    --text:#1a1a1a; --text-muted:#777; --border:#e4e4e4;
+    --good:#1f7a4d; --bad:#b23b3b;
+    --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --font-mono:'JetBrains Mono','Fira Code',monospace;
+    --max:1080px; --narrow:760px; --radius:6px;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased;}
+  body{font-family:var(--font-sans);font-size:1rem;line-height:1.65;color:var(--text);background:var(--bg);}
+  a{color:var(--text);text-decoration:underline;text-decoration-color:var(--border);text-underline-offset:2px;transition:text-decoration-color .15s;}
+  a:hover{text-decoration-color:var(--text);}
+  img,video,svg{max-width:100%;display:block;}
+  code{font-family:var(--font-mono);font-size:.85em;background:var(--bg-alt);padding:.15em .4em;border-radius:4px;border:1px solid var(--border);}
+
+  .container{max-width:var(--max);margin:0 auto;padding:0 1.5rem;}
+  .narrow{max-width:var(--narrow);margin-left:auto;margin-right:auto;}
+
+  /* ── Hero ──────────────────────────────────────────────────── */
+  .hero{padding:4rem 0 2.5rem;text-align:center;border-bottom:1px solid var(--border);}
+  .venue-badge{margin-bottom:1.25rem;display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;}
+  .badge{display:inline-block;font-family:var(--font-mono);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--accent);border:1px solid var(--border);border-radius:100px;padding:.32em .9em;background:var(--bg-alt);}
+  .badge.accent{color:#fff;background:var(--primary);border-color:var(--primary);}
+  .paper-title{font-size:2.5rem;line-height:1.15;font-weight:700;letter-spacing:-.02em;margin-bottom:.4rem;}
+  .paper-title .subtitle{display:block;font-size:1.3rem;font-weight:500;color:var(--text-muted);margin-top:.6rem;letter-spacing:-.01em;}
+  .author-list{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin:1.6rem 0 .4rem;font-size:1.08rem;}
+  .author a{font-weight:500;}
+  .affiliations{color:var(--text-muted);font-size:.95rem;margin-bottom:.3rem;}
+  .link-buttons{display:flex;gap:.7rem;justify-content:center;flex-wrap:wrap;margin-top:1.6rem;}
+  .btn{display:inline-flex;align-items:center;gap:.5em;font-size:.92rem;font-weight:500;text-decoration:none;
+    color:#fff;background:var(--primary);border:1px solid var(--primary);border-radius:100px;padding:.55em 1.25em;transition:opacity .15s;}
+  .btn:hover{opacity:.82;}
+  .btn.ghost{color:var(--text);background:#fff;border-color:var(--border);}
+
+  /* ── Sections ──────────────────────────────────────────────── */
+  .section{padding:3rem 0;}
+  .section.alt{background:var(--bg-alt);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+  .kicker{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:.5rem;text-align:center;}
+  h2{font-size:1.75rem;font-weight:700;letter-spacing:-.01em;text-align:center;margin-bottom:1.5rem;}
+  h3{font-size:1.18rem;font-weight:600;margin:1.6rem 0 .6rem;}
+  p{margin-bottom:1rem;}
+  .lead{font-size:1.12rem;color:#333;}
+  ul.findings{list-style:none;margin:1.2rem 0;}
+  ul.findings li{position:relative;padding-left:1.7rem;margin-bottom:.7rem;}
+  ul.findings li::before{content:"\2192";position:absolute;left:0;color:var(--primary);font-weight:700;}
+  .tag-good{color:var(--good);font-weight:600;}
+  .tag-bad{color:var(--bad);font-weight:600;}
+
+  /* ── Figure / schematic ────────────────────────────────────── */
+  figure{margin:1.5rem 0;}
+  figcaption{font-size:.88rem;color:var(--text-muted);text-align:center;margin-top:.7rem;}
+  .schematic{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;}
+
+  /* ── Math card ─────────────────────────────────────────────── */
+  .math-card{background:var(--bg-dark);color:#eee;border-radius:var(--radius);padding:1.4rem 1.6rem;margin:1.4rem 0;overflow-x:auto;}
+  .math-card .katex{color:#f4f4f4;}
+  .math-note{font-size:.9rem;color:var(--text-muted);}
+
+  /* ── Results table ─────────────────────────────────────────── */
+  .tbl{width:100%;border-collapse:collapse;margin:1.2rem 0;font-size:.96rem;}
+  .tbl th,.tbl td{padding:.7em .9em;border-bottom:1px solid var(--border);text-align:right;}
+  .tbl th:first-child,.tbl td:first-child{text-align:left;}
+  .tbl thead th{font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted);font-weight:600;}
+  .tbl tbody tr:last-child{font-weight:700;background:var(--bg-alt);}
+  .tbl .num{font-family:var(--font-mono);}
+
+  /* ── Bar comparison ────────────────────────────────────────── */
+  .bars{margin:1.5rem 0;}
+  .bar-row{display:grid;grid-template-columns:130px 1fr 70px;align-items:center;gap:.8rem;margin-bottom:.7rem;}
+  .bar-label{font-size:.9rem;color:#444;}
+  .bar-track{background:#ececec;border-radius:100px;height:22px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:100px;display:block;}
+  .bar-fill.std{background:var(--bad);}
+  .bar-fill.rel{background:var(--good);}
+  .bar-val{font-family:var(--font-mono);font-size:.86rem;text-align:right;}
+
+  /* ── Callout ───────────────────────────────────────────────── */
+  .callout{border-left:3px solid var(--primary);background:var(--bg-alt);padding:1rem 1.3rem;border-radius:0 var(--radius) var(--radius) 0;margin:1.4rem 0;}
+
+  /* ── BibTeX ────────────────────────────────────────────────── */
+  pre.bibtex{background:var(--bg-dark);color:#eee;border-radius:var(--radius);padding:1.2rem 1.4rem;overflow-x:auto;font-family:var(--font-mono);font-size:.82rem;line-height:1.5;}
+
+  footer{padding:2.5rem 0;text-align:center;color:var(--text-muted);font-size:.88rem;border-top:1px solid var(--border);}
+
+  @media(max-width:680px){
+    .paper-title{font-size:1.9rem;}
+    .paper-title .subtitle{font-size:1.05rem;}
+    .bar-row{grid-template-columns:96px 1fr 56px;}
+  }
+  </style>
+</head>
+<body>
+
+<!-- ╔═══ HERO ═══╗ -->
+<header class="hero">
+  <div class="container">
+    <div class="venue-badge">
+      <span class="badge accent">Proprioceptive · No Camera</span>
+      <span class="badge">WalkOnSuit Exoskeleton · 12-DOF</span>
+      <span class="badge">Isaac Gym</span>
+    </div>
+
+    <h1 class="paper-title">
+      Contact-Relative Invariant EKF
+      <span class="subtitle">Rescuing State Estimation for Wide-Footed Wearable Robots</span>
+    </h1>
+
+    <!-- ===== EDIT authors / affiliation ===== -->
+    <div class="author-list">
+      <div class="author"><a href="#">Jinsu Park</a></div>
+    </div>
+    <div class="affiliations">Wearable Robotics &amp; State Estimation</div>
+
+    <div class="link-buttons">
+      <!-- ===== EDIT links ===== -->
+      <a href="#" class="btn ghost"><i class="fas fa-file-pdf"></i> Paper (soon)</a>
+      <a href="https://github.com/" class="btn"><i class="fab fa-github"></i> Code</a>
+      <a href="#results" class="btn ghost"><i class="fas fa-chart-column"></i> Results</a>
+    </div>
+  </div>
+</header>
+
+<!-- ╔═══ ABSTRACT ═══╗ -->
+<section class="section">
+  <div class="container narrow">
+    <p class="kicker">Abstract</p>
+    <h2>A wide foot quietly breaks the textbook filter</h2>
+    <p class="lead">
+      Contact-aided Invariant EKF is the workhorse of legged state estimation: it pins each
+      stance foot as a fixed point landmark and fuses the constraint with the IMU. That
+      assumption holds for a small, point-like foot — but a <strong>wearable exoskeleton has a
+      broad, flat sole</strong>. As the foot rolls heel-to-toe, the true contact point migrates
+      across the sole, so the "fixed" landmark is actually moving. The filter mistakes this for
+      body motion, the gyro bias runs away, and the absolute pose
+      <span class="tag-bad">diverges by tens of metres</span> over a single walk.
+    </p>
+    <p>
+      We fix it without adding any new sensor. Instead of pinning the foot in the world, we
+      measure the body's motion <em>relative</em> to the stance foot and fuse it with a
+      left-invariant single-clone SLAM update. The stance foot's (unknown, drifting) world pose
+      <strong>cancels exactly</strong>, so the measurement lives entirely in the observable
+      directions — no absolute yaw, no camera, only the existing encoders and IMU.
+    </p>
+    <ul class="findings">
+      <li>Standard contact-aided InEKF drifts <span class="tag-bad">~14&nbsp;m</span> over an 80&nbsp;s wide-foot walk (and far worse in deployment).</li>
+      <li>The proprioceptive contact-relative correction cuts that to <span class="tag-good">~6.6&nbsp;m</span> — a <strong>2.2× reduction</strong>, robust across every trajectory tested.</li>
+      <li>Best configuration reaches <span class="tag-good">2.2&nbsp;m</span> position RMSE @ 79&nbsp;s — matching a camera-based relative-SLAM baseline (2.57&nbsp;m) with <strong>no camera at all</strong>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ╔═══ PROBLEM ═══╗ -->
+<section class="section alt">
+  <div class="container narrow">
+    <p class="kicker">The Problem</p>
+    <h2>Why wide feet diverge</h2>
+    <p>
+      The contact-aided InEKF treats each planted foot as a single world-fixed point and corrects
+      the filter so that point has zero velocity. For a wide, flat exoskeleton sole the contact
+      <em>region</em> sweeps from heel to toe during stance — the effective landmark slides several
+      centimetres per step while the filter believes it is nailed down. Those false
+      "zero-velocity" pseudo-measurements inject a steady error into the unobservable yaw / gyro-bias
+      subspace, which compounds into runaway divergence.
+    </p>
+
+    <figure>
+      <div class="schematic">
+        <svg viewBox="0 0 680 220" width="680" height="220" role="img" aria-label="Point-contact vs contact-relative schematic">
+          <!-- ground -->
+          <line x1="20" y1="170" x2="320" y2="170" stroke="#bbb" stroke-width="2"/>
+          <line x1="360" y1="170" x2="660" y2="170" stroke="#bbb" stroke-width="2"/>
+          <!-- LEFT: point-contact (wrong) -->
+          <text x="170" y="28" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#b23b3b">STANDARD · point landmark</text>
+          <!-- wide foot -->
+          <rect x="95" y="156" width="150" height="14" rx="3" fill="#ddd" stroke="#999"/>
+          <!-- migrating contact point arrow -->
+          <circle cx="110" cy="163" r="5" fill="#b23b3b"/>
+          <circle cx="230" cy="163" r="5" fill="#b23b3b" opacity="0.45"/>
+          <path d="M118 145 q56 -22 104 0" fill="none" stroke="#b23b3b" stroke-width="1.5" marker-end="url(#ar)"/>
+          <text x="170" y="135" text-anchor="middle" font-size="11" fill="#b23b3b">contact point migrates</text>
+          <!-- body -->
+          <rect x="150" y="60" width="40" height="40" rx="5" fill="#fff" stroke="#444"/>
+          <line x1="170" y1="100" x2="125" y2="158" stroke="#444" stroke-width="2"/>
+          <text x="170" y="200" text-anchor="middle" font-size="11" fill="#777">"fixed" point is actually moving → drift</text>
+
+          <!-- divider -->
+          <line x1="340" y1="20" x2="340" y2="205" stroke="#e0e0e0" stroke-width="1" stroke-dasharray="4 4"/>
+
+          <!-- RIGHT: contact-relative (ours) -->
+          <text x="510" y="28" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="12" fill="#1f7a4d">OURS · relative to clone</text>
+          <rect x="435" y="156" width="150" height="14" rx="3" fill="#ddd" stroke="#999"/>
+          <!-- clone body (ghost) and current body -->
+          <rect x="470" y="64" width="38" height="38" rx="5" fill="#fff" stroke="#bbb" stroke-dasharray="3 3"/>
+          <text x="489" y="58" text-anchor="middle" font-size="10" fill="#999">clone</text>
+          <rect x="540" y="70" width="38" height="38" rx="5" fill="#fff" stroke="#1f7a4d"/>
+          <!-- legs to same foot -->
+          <line x1="489" y1="102" x2="505" y2="158" stroke="#bbb" stroke-width="2" stroke-dasharray="3 3"/>
+          <line x1="559" y1="108" x2="512" y2="158" stroke="#1f7a4d" stroke-width="2"/>
+          <!-- relative motion arrow -->
+          <path d="M508 84 q26 -6 44 2" fill="none" stroke="#1f7a4d" stroke-width="1.8" marker-end="url(#ag)"/>
+          <text x="528" y="74" text-anchor="middle" font-size="11" fill="#1f7a4d">Δ measured vs foot</text>
+          <text x="510" y="200" text-anchor="middle" font-size="11" fill="#777">foot world pose cancels → observable</text>
+
+          <defs>
+            <marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#b23b3b"/></marker>
+            <marker id="ag" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6" fill="#1f7a4d"/></marker>
+          </defs>
+        </svg>
+      </div>
+      <figcaption><strong>Left:</strong> the standard filter pins a single point that secretly slides under the wide sole. <strong>Right:</strong> we measure body motion relative to a pose <em>clone</em>, anchored by the same foot — the foot's drifting world pose cancels.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ╔═══ METHOD ═══╗ -->
+<section class="section">
+  <div class="container narrow">
+    <p class="kicker">Method</p>
+    <h2>Contact-synthesized relative measurement</h2>
+    <p>
+      While a foot is planted, its world position $f_w$ is constant, so the body satisfies
+      $f_w = p_{wb} + R_{wb}\,p_{bf}$ at every instant ($p_{bf}$ is the foot position in the body
+      frame, straight from the leg encoders). Subtracting two consecutive frames, the foot world
+      position drops out and the body's relative motion is:
+    </p>
+
+    <div class="math-card">
+      $$\Delta p \;=\; p_{bf}^{\,\text{prev}} \;-\; \Delta R\,\;p_{bf}^{\,\text{cur}}, \qquad \Delta R \;=\; R_{wb}^{\text{prev}\top} R_{wb}^{\text{cur}}$$
+    </div>
+
+    <p class="math-note">
+      $\Delta R$ comes from integrating the gyro over the window — an independent proprioceptive
+      source. Crucially, a common world-frame yaw applied to both frames leaves $\Delta p$ and
+      $\Delta R$ unchanged: <strong>the measurement carries no absolute yaw or position</strong>,
+      exactly the directions a contact+IMU system cannot observe. It is fused through the
+      <em>left-invariant single-clone SLAM</em> update, which constrains the body against a snapshot
+      ("clone") of its own pose rather than against the world.
+    </p>
+
+    <h3>What made it stable</h3>
+    <p>The relative update is numerically delicate; three choices turned a diverging prototype into a robust estimator:</p>
+    <ul class="findings">
+      <li><strong>10&nbsp;Hz window-accumulated deltas</strong> — correcting at the full 100&nbsp;Hz with millimetre deltas ill-conditions the covariance and explodes.</li>
+      <li><strong>Clone initialised once, never reset</strong> — the update auto-refreshes the clone each step, so churning it on every footstep was itself the instability.</li>
+      <li><strong>Adaptive measurement covariance</strong> — a foot that flickers out of contact mid-window self-attenuates instead of kicking the filter.</li>
+    </ul>
+    <p class="math-note">
+      The relative correction <em>replaces</em> the absolute point-contact landmark update; the
+      underlying SE${}_K$(3) right-invariant filter and the C++ relative-SLAM backend are reused
+      unchanged.
+    </p>
+  </div>
+</section>
+
+<!-- ╔═══ RESULTS ═══╗ -->
+<section class="section alt" id="results">
+  <div class="container narrow">
+    <p class="kicker">Results</p>
+    <h2>Standard InEKF vs. contact-relative</h2>
+    <p>
+      Controlled offline ablation on a 12-DOF WalkOnSuit exoskeleton in Isaac Gym: identical
+      recorded IMU + encoder + contact streams drive both filters, toggling only the correction.
+      We report final position error after each 80&nbsp;s walk across three distinct trajectories.
+    </p>
+
+    <figure>
+      <img src="static/trajectory.png" alt="Top-down trajectory and position-error comparison: standard InEKF drifts away while the contact-relative estimate tracks ground truth." />
+      <figcaption>
+        <strong>Left:</strong> top-down path — the standard InEKF (red) spirals away from the
+        2.8&nbsp;m walk, while the contact-relative estimate (green) stays locked to ground truth
+        (black; inset zoom). <strong>Right:</strong> position error grows to ~14&nbsp;m for the
+        standard filter but stays bounded near 6&nbsp;m with the proprioceptive correction.
+      </figcaption>
+    </figure>
+
+    <div class="bars">
+      <div class="bar-row">
+        <span class="bar-label">Standard InEKF</span>
+        <span class="bar-track"><span class="bar-fill std" style="width:78%"></span></span>
+        <span class="bar-val">13.95 m</span>
+      </div>
+      <div class="bar-row">
+        <span class="bar-label">Contact-relative <em>(ours)</em></span>
+        <span class="bar-track"><span class="bar-fill rel" style="width:37%"></span></span>
+        <span class="bar-val">6.59 m</span>
+      </div>
+    </div>
+    <p style="text-align:center;color:var(--text-muted);font-size:.9rem;">Mean final position error over N = 3 distinct trajectories — a <strong style="color:var(--good)">2.2× reduction</strong>, no explosions.</p>
+
+    <table class="tbl">
+      <thead>
+        <tr><th>Trajectory</th><th>Standard InEKF</th><th>Contact-relative</th><th>Improvement</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>walk&nbsp;A</td><td class="num">13.91 m</td><td class="num">6.43 m</td><td class="num">2.2×</td></tr>
+        <tr><td>walk&nbsp;B</td><td class="num">17.90 m</td><td class="num">5.99 m</td><td class="num">3.0×</td></tr>
+        <tr><td>walk&nbsp;C</td><td class="num">10.04 m</td><td class="num">7.36 m</td><td class="num">1.4×</td></tr>
+        <tr><td>Mean</td><td class="num">13.95 m</td><td class="num">6.59 m</td><td class="num">2.2×</td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout">
+      <strong>Best configuration:</strong> position RMSE of <strong>2.21&nbsp;m @ 79&nbsp;s</strong>
+      (final 3.54&nbsp;m) — on par with a <em>camera-based</em> left-invariant relative-SLAM baseline
+      (2.57&nbsp;m vs. 246.85&nbsp;m for naïve InEKF, ~96×), achieved here purely from proprioception.
+    </div>
+    <p class="math-note">
+      Numbers are from a controlled ablation with clean recorded foot kinematics. In live
+      deployment the standard filter degrades much further (kilometre-scale drift), which originally
+      motivated this work.
+    </p>
+  </div>
+</section>
+
+<!-- ╔═══ CITATION ═══╗ -->
+<section class="section">
+  <div class="container narrow">
+    <p class="kicker">Citation</p>
+    <h2>BibTeX</h2>
+    <pre class="bibtex">@misc{park_contact_relative_inekf,
+  title  = {Contact-Relative Invariant EKF: Rescuing State Estimation
+            for Wide-Footed Wearable Robots},
+  author = {Park, Jinsu},
+  year   = {2026},
+  note   = {Project page},
+}</pre>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>Built for the WalkOnSuit exoskeleton state-estimation project · Isaac Gym RL-MPC framework.</p>
+    <p style="margin-top:.4rem;">Page template inspired by minimalist academic project pages.</p>
+  </div>
+</footer>
+
+</body>
+</html>
